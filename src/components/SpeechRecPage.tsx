@@ -1,7 +1,8 @@
 import { useState } from "react";
 
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
+// @ts-ignore
+const SpeechRecognition = window.webkitSpeechRecognition;
+const SpeechSynthesis = window.speechSynthesis;
 
 export function SpeechRec() {
   const [speechRecActive, setSpeechRecActive] = useState(false);
@@ -14,10 +15,12 @@ export function SpeechRec() {
     rec.lang = "de-DE";
     rec.interimResults = true;
     rec.maxAlternatives = 1;
+    // @ts-ignore
     rec.onresult = (e) => {
       const sentence = e.results[0][0].transcript;
       setSentence(sentence);
     };
+    // @ts-ignore
     rec.onend = (e) => {
       setSpeechRecActive(false);
     };
@@ -30,12 +33,21 @@ export function SpeechRec() {
     if (recording) {
       initRecognition();
     } else {
+      // @ts-ignore
       recognition.stop();
       setRecognition(null);
     }
     setSpeechRecActive(!speechRecActive);
   }
 
+  function speakToMe() {
+    const phrase = new SpeechSynthesisUtterance(sentence);
+    phrase.lang = "de-DE";
+    phrase.volume = 100;
+    phrase.rate = 0.8;
+    phrase.pitch = 0.9;
+    SpeechSynthesis.speak(phrase);
+  }
   return (
     <div className="w-4/5 h-4/5 m-5 border border-gray-200 flex flex-col justify-center items-center gap-5">
       <div className="flex gap-4 items-center">
@@ -63,6 +75,11 @@ export function SpeechRec() {
       </div>
       <div>
         <p className="text-sm font-bold text-center px-10">{sentence}</p>
+      </div>
+      <div>
+        <button className="border rounded-full px-4 py-2" onClick={speakToMe}>
+          speak to me, computer!
+        </button>
       </div>
     </div>
   );
